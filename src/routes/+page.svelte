@@ -40,15 +40,21 @@
 	}
 </script>
 
-<div>
-	<div>
-		Volume: <input type="range" bind:value={masterVolume} min="0" max="1" step="0.01" />
-		<textarea bind:value={aiPrompt}></textarea>
-		<button on:click={() => getSoundMix(aiPrompt)}></button>
+<div class="container flex flex-col mx-auto max-w-3xl items-center justify-center">
+	<textarea bind:value={aiPrompt}></textarea>
+	<button on:click={() => getSoundMix(aiPrompt)}></button>
+	<div class="container max-w-3xl mx-auto">
+		<hr />
+		Volume:<input type="range" bind:value={masterVolume} min="0" max="1" step="0.01" />
 	</div>
-	<div>
+	<div class="container max-w-3xl mx-auto">
 		{#each _.entries(audioTracks) as [trackName, track]}
-			<AudioTrack name={trackName} src={track.src} bind:volume={track.volume}></AudioTrack>
+			<AudioTrack
+				name={trackName}
+				src={track.src}
+				bind:volume={track.volume}
+				maxVolume={masterVolume}
+			></AudioTrack>
 		{/each}
 	</div>
 </div>
