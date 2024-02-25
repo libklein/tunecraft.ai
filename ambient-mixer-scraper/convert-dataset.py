@@ -1,0 +1,104 @@
+from typing import Iterable
+import typer
+from pathlib import Path
+from dataclasses import dataclass
+import json
+
+@dataclass(frozen=True)
+class Track:
+    id: int
+    name: str
+    url: str
+    mute: bool
+    volume: int
+    balance: int
+    random: bool
+    random_counter: int
+    random_unit: str
+    crossfade: bool
+
+@dataclass(frozen=True)
+class MixTrack:
+    title: str
+    description: str
+    categories: list[str]
+    mix: list[Track]
+
+def create_system_prompt(track_names: Iterable[str]):
+    return r"""Your task is to mix ambient sounds by composing a set of ambient audio tracks.
+You can assign each track a volume between 0 to 1.
+Your response should be a JSON object of the following format:
+---
+[
+  {
+    "name": "<track name>",
+    "volume": "<the volume>"
+  },
+  ...
+]
+---
+You have the following tracks available:\n\n
+---""" + "\n".join(x for x in track_names) + r"""---
+I will provide descriptions of the enviroment and mood I'd like to create an ambient mix for in my next prompt.
+"""
+
+def parse_track(track: dict) -> Track:
+    return Track(
+        id=track["id_audio"],
+        name=track["name_audio"],
+        url=track["url_audio"],
+        mute=track["mute"] == "true",
+        volume=int(track["volume"]),
+        balance=int(track["balance"]),
+        random=track["random"] == "true",
+        random_counter=int(track["random_counter"]),
+        random_unit=track["random_unit"],
+        crossfade=track["crossfade"] == "true"
+    )
+
+def parse_mix_track(mix_track: dict) -> MixTrack:
+    return MixTrack(
+        title=mix_track["title"],
+        description=mix_track["description"],
+        categories=mix_track["categories"],
+        mix=[parse_track(x) for x in mix_track['mix'].values()]
+    )
+
+def create_messages(mix_track: MixTrack, system_prompt: str) -> list[dict[str, str]]:
+    return [
+        {
+            "role": "system",
+            "content": system_prompt
+        },
+        {
+            "role": "user",
+            "content": mix_track.description
+        },
+        {
+            "role": "assistant",
+            "content": json.dumps([{"name": x.name, "volume": x.volume} for x in mix_track.mix])
+        }
+    ]
+
+def convert_dataset(mixes: Path, output_path: Path):
+    typer.echo("Converting dataset...")
+    # Parse mixes form mixes file, which contains a list of mix tracks in JSON format
+    with open(mixes, "r") as f:
+        mix_tracks = json.load(f)
+    mix_tracks = [parse_mix_track(x) for x in mix_tracks]
+
+    track_names = {y.name for x in mix_tracks for y in x.mix}
+
+    # Create system prompt
+    system_prompt = create_system_prompt(track_names)
+    
+    # Create conversational dataset
+    conversation = [{'messages': create_messages(x, system_prompt)} for x in mix_tracks]
+
+    with open(output_path, "w") as output_stream:
+        for obj in conversation:
+            json.dump(obj, output_stream)
+    typer.echo(f"Created conversation with {len(conversation)} prompts.")
+
+if __name__ == "__main__":
+    typer.run(convert_dataset)

@@ -1,5 +1,6 @@
 # Outputs
 mixes.json
+conversation.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

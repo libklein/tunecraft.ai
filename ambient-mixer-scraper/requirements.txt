@@ -2,3 +2,4 @@ scrapy
 rich
 bs4
 xmltodict
+typer
