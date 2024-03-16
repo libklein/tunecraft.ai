@@ -33,3 +33,6 @@ fi
 # install flash-attn
 pip install ninja packaging
 MAX_JOBS=4 pip install flash-attn --no-build-isolation
+
+# Setup huggingface git credential storing
+git config --global credential.helper store
