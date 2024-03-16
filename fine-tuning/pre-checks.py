@@ -154,7 +154,7 @@ def estimate_sequence_length(dataset: Path, tokenizer_id: str = "hf-internal-tes
 
     # Load the dataset
     with open(dataset, 'r', encoding='utf-8') as f:
-        items = [json.loads(line) for line in f]
+        items = json.load(f)
 
     # Auto calculate the context length
     stats = get_tokenized_stats(tokenizer, items, print_stats=True)
