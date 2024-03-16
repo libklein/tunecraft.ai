@@ -15,7 +15,8 @@ pip install --upgrade \
 	"accelerate" \
 	"bitsandbytes" \
 	"numpy" \
-	"typer"
+	"typer" \
+	"flask"
 
 # install peft & trl from github
 pip install git+https://github.com/huggingface/trl --upgrade
