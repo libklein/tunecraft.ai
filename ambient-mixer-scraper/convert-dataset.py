@@ -3,6 +3,7 @@ import typer
 from pathlib import Path
 from dataclasses import dataclass
 import json
+from collections import Counter
 
 @dataclass(frozen=True)
 class Track:
@@ -32,7 +33,10 @@ Your response should be a JSON object of the following format:
 [
   {
     "name": "<track name>",
-    "volume": "<the volume>"
+    "volume": "<the volume>",
+    "random": "<true or false>",
+    "random_counter": "<how often per random_unit the sound should play>",
+    "random_unit": "<1m for 1 minute, 10m for 10 minutes, 1h for 1 hour>",
   },
   ...
 ]
@@ -61,7 +65,7 @@ def parse_mix_track(mix_track: dict) -> MixTrack:
         title=mix_track["title"],
         description=mix_track["description"],
         categories=mix_track["categories"],
-        mix=[parse_track(x) for x in mix_track['mix'].values()]
+        mix=[parse_track(x) for x in mix_track['mix'].values() if x['name_audio'] != '-']
     )
 
 def create_messages(mix_track: MixTrack, system_prompt: str) -> list[dict[str, str]]:
@@ -76,24 +80,36 @@ def create_messages(mix_track: MixTrack, system_prompt: str) -> list[dict[str, s
         },
         {
             "role": "assistant",
-            "content": json.dumps([{"name": x.name, "volume": x.volume} for x in mix_track.mix])
+            "content": json.dumps([{"name": x.name, "volume": x.volume, "random": x.random, "random_counter": x.random_counter, "random_unit": x.random_unit} for x in mix_track.mix])
         }
     ]
 
-def convert_dataset(mixes: Path, output_path: Path):
+def get_tracks(mixed_tracks: list[MixTrack], max_tracks: int) -> list[MixTrack]:
+    # Find most common tracks
+    track_counter = Counter([x.name for y in mixed_tracks for x in y.mix])
+    top_tracks = {x[0] for x in track_counter.most_common(max_tracks)}
+    print(f"Top tracks: {top_tracks}")
+    # Filter out any mix where at least one track is not in the top tracks
+    return [x for x in mixed_tracks if all(y.name in top_tracks for y in x.mix)]
+
+def convert_dataset(mixes: Path, output_path: Path, max_tracks: int = 250):
     typer.echo("Converting dataset...")
     # Parse mixes form mixes file, which contains a list of mix tracks in JSON format
     with open(mixes, "r") as f:
         mix_tracks = json.load(f)
+
     mix_tracks = [parse_mix_track(x) for x in mix_tracks]
 
-    track_names = {y.name for x in mix_tracks for y in x.mix}
+    tracks = get_tracks(mix_tracks, max_tracks)
+
+    track_names = {y.name for x in tracks for y in x.mix}
+    assert '-' not in track_names
 
     # Create system prompt
     system_prompt = create_system_prompt(track_names)
     
     # Create conversational dataset
-    conversation = [{'messages': create_messages(x, system_prompt)} for x in mix_tracks]
+    conversation = [{'messages': create_messages(x, system_prompt)} for x in tracks]
 
     with open(output_path, "w") as output_stream:
         for obj in conversation:
