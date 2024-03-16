@@ -4,7 +4,7 @@ import { generateAmbientMix } from '$lib/ai.server';
 import { audioResources } from '$lib/tracks';
 import type { TrackResponseItem } from '$lib/models';
 
-export async function POST({ request }: RequestHandler) {
+export const POST: RequestHandler = async ({ request }) => {
   const postData = await request.json();
   const query = postData.query;
   // Query AI

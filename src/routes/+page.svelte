@@ -6,8 +6,11 @@
 
 	let masterVolume: number = 1;
 
-	let audioTracks: Map<string, Track> = DEFAULT_TRACK_MAP;
-	let aiPrompt: string;
+	let selectedTracks: Track[] = [];
+	let aiPrompt: string =
+		'Relaxing music for studying with a fireplace in the background and some train noises.';
+
+	console.log(DEFAULT_TRACK_MAP);
 
 	async function getSoundMix(aiPrompt: string) {
 		// Request to backend
@@ -25,18 +28,16 @@
 			return;
 		}
 
-		// TODO Handle failure
-
-		// Update the audio track volumes
-		trackMix.forEach(({ name, volume }) => {
-			if (audioTracks.has(name)) {
-				console.log('Updating ', name, volume);
-				const track = audioTracks.get(name);
-				audioTracks.set(name, { ...track, volume });
-			}
+		selectedTracks = trackMix.map((track) => {
+			const trackDefinition = DEFAULT_TRACK_MAP.get(track.name);
+			if (!trackDefinition) console.error(`Track ${track.name} not found in track map`);
+			return {
+				...trackDefinition,
+				...track,
+				volume: track.volume / 100
+			};
 		});
-
-		audioTracks = audioTracks;
+		console.log(selectedTracks);
 	}
 </script>
 
@@ -48,9 +49,9 @@
 		Volume:<input type="range" bind:value={masterVolume} min="0" max="1" step="0.01" />
 	</div>
 	<div class="container max-w-3xl mx-auto">
-		{#each _.entries(audioTracks) as [trackName, track]}
+		{#each selectedTracks as track}
 			<AudioTrack
-				name={trackName}
+				name={track.name}
 				src={track.src}
 				bind:volume={track.volume}
 				maxVolume={masterVolume}
