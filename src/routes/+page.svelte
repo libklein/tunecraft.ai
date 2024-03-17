@@ -2,6 +2,7 @@
 	import AudioTrack from '$lib/AudioTrack.svelte';
 	import { DEFAULT_TRACK_MAP } from '$lib/tracks';
 	import type { GenerateTrackMixResponse, Track } from '$lib/models';
+	import { TRACK_PERIOD_DURATION_TO_SECONDS } from '$lib/models.d';
 	import _ from 'lodash';
 
 	let masterVolume: number = 1;
@@ -9,8 +10,6 @@
 	let selectedTracks: Track[] = [];
 	let aiPrompt: string =
 		'Relaxing music for studying with a fireplace in the background and some train noises.';
-
-	console.log(DEFAULT_TRACK_MAP);
 
 	async function getSoundMix(aiPrompt: string) {
 		// Request to backend
@@ -28,16 +27,24 @@
 			return;
 		}
 
-		selectedTracks = trackMix.map((track) => {
-			const trackDefinition = DEFAULT_TRACK_MAP.get(track.name);
-			if (!trackDefinition) console.error(`Track ${track.name} not found in track map`);
-			return {
-				...trackDefinition,
-				...track,
-				volume: track.volume / 100
-			};
-		});
-		console.log(selectedTracks);
+		selectedTracks = trackMix
+			.map((track) => {
+				const trackDefinition = DEFAULT_TRACK_MAP.get(track.name);
+				if (!trackDefinition) {
+					console.error(`Track ${track.name} not found in track map`);
+					return;
+				}
+				console.log(track);
+				return {
+					...trackDefinition,
+					...track,
+					volume: track.volume / 100,
+					random: track.random,
+					periodDurationSeconds: TRACK_PERIOD_DURATION_TO_SECONDS[track.random_unit],
+					expectedPlaysPerPeriod: track.random_counter
+				};
+			})
+			.filter(Boolean) as Track[];
 	}
 </script>
 
@@ -54,6 +61,9 @@
 				name={track.name}
 				src={track.src}
 				bind:volume={track.volume}
+				random={track.random}
+				periodDurationSeconds={track.periodDurationSeconds}
+				expectedPlaysPerPeriod={track.expectedPlaysPerPeriod}
 				maxVolume={masterVolume}
 			></AudioTrack>
 		{/each}
