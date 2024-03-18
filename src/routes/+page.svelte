@@ -34,7 +34,6 @@
 					console.error(`Track ${track.name} not found in track map`);
 					return;
 				}
-				console.log(track);
 				return {
 					...trackDefinition,
 					...track,

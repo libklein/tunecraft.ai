@@ -2,7 +2,7 @@ const ONE_MINUTE = "1m";
 const TEN_MINUTES = "10m";
 const ONE_HOUR = "1h";
 
-export const TRACK_PERIOD_DURATION_TO_SECONDS = {
+export const TRACK_PERIOD_DURATION_TO_SECONDS: Record<ONE_MINUTE | TEN_MINUTES | ONE_HOUR, number> = {
   [ONE_MINUTE]: 60,
   [TEN_MINUTES]: 600,
   [ONE_HOUR]: 3600
@@ -15,7 +15,7 @@ export interface Track {
   volume: number,
   random: boolean,
   periodDurationSeconds: ONE_MINUTE | TEN_MINUTES | ONE_HOUR,
-  expectedPlaysPerSecond: number
+  expectedPlaysPerPeriod: number
 }
 
 interface TrackResponseItem {
