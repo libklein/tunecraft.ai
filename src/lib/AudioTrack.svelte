@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { Howl, Howler } from 'howler';
 	import { onDestroy } from 'svelte';
+	import { Slider } from '$lib/components/ui/slider';
+	import { Label } from '$lib/components/ui/label';
+	import * as Card from '$lib/components/ui/card';
 
 	export let name: string;
 	export let src: string;
@@ -10,8 +13,12 @@
 	export let expectedPlaysPerPeriod: number = 0;
 	export let maxVolume: number = 1;
 
+	export { _class as class };
+
 	let sound: Howl | null = null;
 	let nextPlayTimer: ReturnType<typeof setTimeout> | null = null;
+	let _volume = [volume];
+	let _class = '';
 
 	function createSound(src: string, random: boolean) {
 		if (sound) {
@@ -39,6 +46,7 @@
 		}, nextPlay);
 	}
 
+	$: volume = _volume[0];
 	$: scaledVolume = volume * maxVolume;
 	$: createSound(src, random);
 	$: sound && sound.volume(scaledVolume);
@@ -51,11 +59,19 @@
 	});
 </script>
 
-<div class="container">
-	{name}:
-	<input type="range" id="volume" bind:value={volume} min="0" max="1" step="0.01" />
-	<label for="volume">{volume * 100}%</label>
-</div>
+<Card.Root class={_class}>
+	<Card.Header>
+		<Card.Title>{name}</Card.Title>
+		<!-- <Card.Description>Card Description</Card.Description> -->
+	</Card.Header>
+	<Card.Content>
+		<Slider id="volume-slider" bind:value={_volume} min={0} max={1} step={0.01} />
+		<label for="volume-slider">{volume * 100}%</label>
+	</Card.Content>
+	<!-- <Card.Footer> -->
+	<!-- 	<p>Card Footer</p> -->
+	<!-- </Card.Footer> -->
+</Card.Root>
 
 <style>
 	/* your styles go here */

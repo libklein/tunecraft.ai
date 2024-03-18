@@ -4,12 +4,25 @@
 	import type { GenerateTrackMixResponse, Track } from '$lib/models';
 	import { TRACK_PERIOD_DURATION_TO_SECONDS } from '$lib/models.d';
 	import _ from 'lodash';
+	import { Slider } from '$lib/components/ui/slider';
+	import { Separator } from '$lib/components/ui/separator';
+	import { Input } from '$lib/components/ui/input';
+	import { Textarea } from '$lib/components/ui/textarea';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { onMount } from 'svelte';
+	import AudioTrackSelector from '@/AudioTrackSelector.svelte';
 
-	let masterVolume: number = 1;
+	let _masterVolume: number[] = [1];
+	$: masterVolume = _masterVolume[0];
 
 	let selectedTracks: Track[] = [];
 	let aiPrompt: string =
 		'Relaxing music for studying with a fireplace in the background and some train noises.';
+	let aiPromptFocused = false;
+
+	function focusAIPrompt() {
+		aiPromptFocused = true;
+	}
 
 	async function getSoundMix(aiPrompt: string) {
 		// Request to backend
@@ -45,26 +58,43 @@
 			})
 			.filter(Boolean) as Track[];
 	}
+
+	onMount(() => {
+		getSoundMix(aiPrompt);
+	});
 </script>
 
+<Dialog.Root bind:open={aiPromptFocused}>
+	<Dialog.Portal>
+		<Dialog.Overlay />
+		<Dialog.Content>
+			<Textarea bind:value={aiPrompt} />
+		</Dialog.Content>
+	</Dialog.Portal>
+</Dialog.Root>
+
 <div class="container flex flex-col mx-auto max-w-3xl items-center justify-center">
-	<textarea bind:value={aiPrompt}></textarea>
+	<Input type="text" bind:value={aiPrompt} on:focus={focusAIPrompt} />
 	<button on:click={() => getSoundMix(aiPrompt)}></button>
 	<div class="container max-w-3xl mx-auto">
-		<hr />
-		Volume:<input type="range" bind:value={masterVolume} min="0" max="1" step="0.01" />
+		<Separator />
+		<Slider bind:value={_masterVolume} min={0} max={1} step={0.01} />
 	</div>
-	<div class="container max-w-3xl mx-auto">
+	<ul class="container max-w-3xl mx-auto flex flex-row flex-wrap justify-center gap-4">
 		{#each selectedTracks as track}
-			<AudioTrack
-				name={track.name}
-				src={track.src}
-				bind:volume={track.volume}
-				random={track.random}
-				periodDurationSeconds={track.periodDurationSeconds}
-				expectedPlaysPerPeriod={track.expectedPlaysPerPeriod}
-				maxVolume={masterVolume}
-			></AudioTrack>
+			<li class="w-48 h-48 flex">
+				<AudioTrack
+					class="w-full"
+					name={track.name}
+					src={track.src}
+					bind:volume={track.volume}
+					random={track.random}
+					periodDurationSeconds={track.periodDurationSeconds}
+					expectedPlaysPerPeriod={track.expectedPlaysPerPeriod}
+					maxVolume={masterVolume}
+				></AudioTrack>
+			</li>
 		{/each}
-	</div>
+		<li class="w-48 h-48 flex"><AudioTrackSelector class="w-full"></AudioTrackSelector></li>
+	</ul>
 </div>
