@@ -7,7 +7,7 @@
 	let _class = '';
 </script>
 
-<Card.Root class={_class}>
+<Card.Root class={_class + ' hover:cursor-pointer hover:drop-shadow'} on:click>
 	<Card.Content class="flex justify-center items-center w-full h-full p-20"
 		><Plus class="w-full h-full" /></Card.Content
 	>

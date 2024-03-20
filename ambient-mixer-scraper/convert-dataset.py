@@ -88,7 +88,6 @@ def get_tracks(mixed_tracks: list[MixTrack], max_tracks: int) -> list[MixTrack]:
     # Find most common tracks
     track_counter = Counter([x.name for y in mixed_tracks for x in y.mix])
     top_tracks = {x[0] for x in track_counter.most_common(max_tracks)}
-    print(f"Top tracks: {top_tracks}")
     # Filter out any mix where at least one track is not in the top tracks
     return [x for x in mixed_tracks if all(y.name in top_tracks for y in x.mix)]
 
