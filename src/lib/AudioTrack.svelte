@@ -59,7 +59,7 @@
 	});
 </script>
 
-<Card.Root class="w-full">
+<Card.Root class="w-full flex flex-col justify-end">
 	<Card.Header>
 		<Card.Title>{name}</Card.Title>
 		<!-- <Card.Description>Card Description</Card.Description> -->
@@ -67,8 +67,8 @@
 	<Card.Content class="flex flex-row">
 		<VolumeControl {volume}></VolumeControl>
 	</Card.Content>
-	<Card.Footer>
-		<Button class="w-full" on:click={() => dispatch('remove')}>
+	<Card.Footer class="pb-2 grow flex flex-col justify-end">
+		<Button class="w-full h-8 bg-red-800 hover:bg-red-700" on:click={() => dispatch('remove')}>
 			<Trash></Trash>
 		</Button>
 	</Card.Footer>

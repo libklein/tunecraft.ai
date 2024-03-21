@@ -93,15 +93,20 @@
 	</Dialog.Portal>
 </Dialog.Root>
 
-<div class="container flex flex-col mx-auto max-w-3xl items-center justify-center">
-	<div class="flex flex-row w-full">
+<div class="container flex flex-col mx-auto max-w-3xl items-center justify-center md:mt-32">
+	<span class="flex flex-row w-full items-center font-light">
+		<hr class="grow mr-4" />
+		<span class="text-2xl text-gray-500">GENERATE USING AI</span>
+		<hr class="grow ml-4" />
+	</span>
+	<div class="flex flex-row w-full pt-6 pb-6">
 		<Input type="text" class="grow" bind:value={aiPrompt} on:focus={focusAIPrompt} />
 		<Button on:click={() => getSoundMix(aiPrompt)}><SendHorizonal /></Button>
 	</div>
-	<div class="container w-full">
+	<div class="container w-full font-light">
 		<span class="flex flex-row w-full items-center">
 			<hr class="grow mr-4" />
-			<span>OR GENERATE</span>
+			<span class="text-2xl text-gray-500">OR MIX YOURSELF</span>
 			<hr class="grow ml-4" />
 		</span>
 		<VolumeControl bind:volume={masterVolume}></VolumeControl>
