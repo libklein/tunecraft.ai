@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AudioTrack from '$lib/AudioTrack.svelte';
+	import AudioTrack from '$lib/AudioTrack';
 	import { DEFAULT_TRACK_MAP } from '$lib/tracks';
 	import type { GenerateTrackMixResponse, Track } from '$lib/models';
 	import { TRACK_PERIOD_DURATION_TO_SECONDS } from '$lib/models.d';
@@ -10,24 +10,29 @@
 	import { SendHorizonal } from 'lucide-svelte';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { onMount } from 'svelte';
-	import AudioTrackSelector from '@/AudioTrackSelector.svelte';
+	import AudioTrackSelector from '$lib/AudioTrackSelector';
 	import VolumeControl from '@/VolumeControl.svelte';
 
 	let masterVolume: number = 1;
 
 	let selectedTracks: Track[] = [];
+	let trackMap = _.cloneDeep(DEFAULT_TRACK_MAP);
 	let aiPrompt: string =
 		'Relaxing music for studying with a fireplace in the background and some train noises.';
 	let aiPromptFocused = false;
-	let addingTrack = false;
 
 	function focusAIPrompt() {
 		aiPromptFocused = true;
 	}
 
-	function addTrack() {
-		// Add a new track to the selected tracks
-		addingTrack = true;
+	function addTrack(track: Track) {
+		selectedTracks = [
+			...selectedTracks,
+			{
+				...track,
+				volume: 1
+			}
+		];
 	}
 
 	function removeTrack(track: Track) {
@@ -53,7 +58,7 @@
 
 		selectedTracks = trackMix
 			.map((track) => {
-				const trackDefinition = DEFAULT_TRACK_MAP.get(track.name);
+				const trackDefinition = trackMap.get(track.name);
 				if (!trackDefinition) {
 					console.error(`Track ${track.name} not found in track map`);
 					return;
@@ -85,15 +90,7 @@
 	</Dialog.Portal>
 </Dialog.Root>
 
-<!-- The add track dialog -->
-<Dialog.Root bind:open={addingTrack}>
-	<Dialog.Portal>
-		<Dialog.Overlay />
-		<Dialog.Content>TODO</Dialog.Content>
-	</Dialog.Portal>
-</Dialog.Root>
-
-<div class="container flex flex-col mx-auto max-w-3xl items-center justify-center md:mt-32">
+<div class="container flex flex-col mx-auto max-w-3xl items-center justify-center h-full">
 	<span class="flex flex-row w-full items-center font-light">
 		<hr class="grow mr-4" />
 		<span class="text-2xl text-gray-500">GENERATE USING AI</span>
@@ -112,7 +109,7 @@
 		<VolumeControl bind:volume={masterVolume}></VolumeControl>
 	</div>
 	<ul class="container max-w-3xl mx-auto flex flex-row flex-wrap justify-center gap-4">
-		{#each selectedTracks as track}
+		{#each selectedTracks as track (track.name)}
 			<li class="w-48 h-48 flex">
 				<AudioTrack
 					name={track.name}
@@ -127,7 +124,11 @@
 			</li>
 		{/each}
 		<li class="w-48 h-48 flex">
-			<AudioTrackSelector class="w-full" on:click={addTrack}></AudioTrackSelector>
+			<AudioTrackSelector
+				class="w-full grow"
+				tracks={Array.of(...trackMap.values())}
+				on:add={(e) => addTrack(e.detail)}
+			></AudioTrackSelector>
 		</li>
 	</ul>
 </div>

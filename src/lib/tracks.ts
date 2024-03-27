@@ -5,8 +5,8 @@ export const audioResources: Track[] = tracks.map(track => ({
   ...track,
   description: "",
   random: false,
-  randomUnit: "1m",
-  randomFrequency: 0
+  periodDurationSeconds: 10,
+  expectedPlaysPerPeriod: 1
 }))
 
 export const DEFAULT_TRACK_MAP: Map<string, Track> = new Map(

@@ -41,12 +41,17 @@
 		"@types/lodash": "^4.14.202",
 		"bits-ui": "^0.19.7",
 		"clsx": "^2.1.0",
+		"cmdk-sv": "^0.0.15",
+		"formsnap": "^0.5.1",
 		"howler": "^2.2.4",
 		"lodash": "^4.17.21",
 		"lucide-svelte": "^0.359.0",
 		"openai": "^4.28.0",
+		"svelte-inline-input": "^1.2.1",
 		"svelte-radix": "^1.1.0",
+		"sveltekit-superforms": "^2.11.0",
 		"tailwind-merge": "^2.2.2",
-		"tailwind-variants": "^0.2.1"
+		"tailwind-variants": "^0.2.1",
+		"zod": "^3.22.4"
 	}
 }
