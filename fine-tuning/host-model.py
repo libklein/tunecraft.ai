@@ -6,6 +6,7 @@ from flask import Flask, request
 from transformers import BitsAndBytesConfig
 import os
 from json import dumps, loads
+from unsloth import FastLanguageModel
 
 
 def log_into_huggingface(token: str):
@@ -32,7 +33,8 @@ def evaluate_prompt(pipe, prompt: list[dict]):
     model_response = loads(raw_model_response)
     # Add random_unit = 10m to the response
     for track in model_response:
-        track["random_unit"] = "10m"
+        if "random_unit" not in track:
+            track["random_unit"] = "10m"
     print("Response:", model_response)
 
     serialized_response = dumps(model_response)
@@ -40,19 +42,14 @@ def evaluate_prompt(pipe, prompt: list[dict]):
     return serialized_response
 
 
-def build_pipeline(model_dir_or_id: str):
-    config = BitsAndBytesConfig(
+def build_pipeline(model_dir_or_id: str, max_seq_length: int = 2048):
+    model, tokenizer = FastLanguageModel.from_pretrained(
+        model_name=model_dir_or_id,
+        max_seq_length=max_seq_length,
+        dtype=None,
         load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_compute_dtype=torch.bfloat16,
     )
-    model = AutoPeftModelForCausalLM.from_pretrained(
-        model_dir_or_id,
-        # device_map="auto",
-        # torch_dtype=torch.bfloat16,
-        quantization_config=config,
-    )
-    tokenizer = AutoTokenizer.from_pretrained(model_dir_or_id)
+    FastLanguageModel.for_inference(model)
 
     return pipeline("text-generation", model=model, tokenizer=tokenizer)
 
