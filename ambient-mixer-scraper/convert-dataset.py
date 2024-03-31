@@ -31,7 +31,7 @@ class MixTrack:
 def create_system_prompt(track_names: Iterable[str]):
     return (
         r"""Your task is to mix ambient sounds by composing a set of ambient audio tracks.
-You can assign each track a volume between 0 to 1.
+You can assign each track a volume between 0 to 1. 
 Your response should be a JSON object of the following format:
 ---
 [
@@ -39,7 +39,7 @@ Your response should be a JSON object of the following format:
     "name": "<track name>",
     "volume": "<the volume>",
     "random": "<true or false>",
-    "random_counter": "<how often per minute the sound should play>",
+    "random_counter": "<1m|10m|1h>",
   },
   ...
 ]
@@ -95,6 +95,7 @@ def create_messages(
                         "volume": x.volume,
                         "random": x.random,
                         "random_counter": x.random_counter if x.random else 0,
+                        "random_unit": x.random_unit if x.random else "1h",
                     }
                     for x in mix_track.mix
                 ]
