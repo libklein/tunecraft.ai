@@ -17,10 +17,8 @@
 	let nextPlayTimer: ReturnType<typeof setTimeout> | null = null;
 	let _volume = [volume];
 	let editing = false;
-	let dispatch = createEventDispatcher();
 
 	function createSound(src: string, random: boolean) {
-		console.log('createSound', src, random);
 		if (sound) {
 			sound.unload();
 		}
@@ -67,10 +65,10 @@
 	});
 </script>
 
-<div class="flip-box h-full">
-	<div class="flip-box-inner h-fll" class:flip-it={editing}>
+<div class="flip-box w-full h-full max-h-full">
+	<div class="flip-box-inner w-full h-full max-h-full" class:flip-it={editing}>
 		{#if editing}
-			<div class="flip-back h-full">
+			<div class="flip-back w-full h-full max-h-full">
 				<AudioTrackEditor
 					bind:name
 					bind:src
@@ -88,30 +86,22 @@
 </div>
 
 <style>
-	/* The flip box container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
 	.flip-box {
 		background-color: transparent;
-		width: 400px;
-		height: 300px;
-		/* 		border: 1px solid #ddd; */
-		perspective: 1000px; /* Remove this if you don't want the 3D effect */
+		perspective: 1000px;
 	}
 
 	.flip-back {
 		transform: rotateY(180deg);
 	}
 
-	/* This container is needed to position the front and back side */
 	.flip-box-inner {
 		position: relative;
-		width: 100%;
-		height: 100%;
 		text-align: center;
 		transition: transform 0.4s;
 		transform-style: preserve-3d;
 	}
 
-	/* Do an horizontal flip on button click */
 	.flip-it {
 		transform: rotateY(180deg);
 	}

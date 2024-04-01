@@ -1,6 +1,8 @@
 import type { TrackResponseItem } from '../models';
 
 export async function generateAmbientMix(tracks: string[], query: string): Promise<TrackResponseItem[]> {
+  // Wait 5 seconds
+  await new Promise(resolve => setTimeout(resolve, 5000));
   return [
     {
       "name": "Breakwater",
@@ -36,6 +38,13 @@ export async function generateAmbientMix(tracks: string[], query: string): Promi
       "random": true,
       "random_counter": 5,
       "random_unit": "10m"
-    }
+    },
+    {
+      "name": "All I Ask of You Humming",
+      "volume": 0,
+      "random": false,
+      "random_counter": 3,
+      "random_unit": "10m"
+    },
   ];
 }

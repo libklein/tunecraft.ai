@@ -23,9 +23,9 @@
 	$: volume = _volume[0];
 </script>
 
-<Card.Root class="w-full h-auto flex flex-col justify-start">
+<Card.Root class="w-full h-full flex flex-col justify-start">
 	<Card.Header class="pb-0 pt-2">
-		<Card.Title class="pt-0">{name}</Card.Title>
+		<Card.Title class="pt-0 w-full text-nowrap truncate">{name}</Card.Title>
 	</Card.Header>
 	<Card.Content class="flex flex-col pb-0 pt-0">
 		<VolumeControl bind:volume></VolumeControl>

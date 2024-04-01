@@ -7,11 +7,13 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Button } from '$lib/components/ui/button';
-	import { SendHorizonal } from 'lucide-svelte';
+	import { SendHorizonal, LoaderCircle } from 'lucide-svelte';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { onMount } from 'svelte';
 	import AudioTrackSelector from '$lib/AudioTrackSelector';
 	import VolumeControl from '@/VolumeControl.svelte';
+	import * as Alert from '$lib/components/ui/alert';
+	import { ExclamationTriangle } from 'svelte-radix';
 
 	let masterVolume: number = 1;
 
@@ -20,6 +22,8 @@
 	let aiPrompt: string =
 		'Relaxing music for studying with a fireplace in the background and some train noises.';
 	let aiPromptFocused = false;
+	let loading = false;
+	let error = '';
 
 	function focusAIPrompt() {
 		aiPromptFocused = true;
@@ -40,7 +44,16 @@
 		selectedTracks = selectedTracks.filter((t) => t !== track);
 	}
 
+	function handlePromptKeyPress(event: KeyboardEvent) {
+		// Ctrl + Enter to submit
+		if (event.key === 'Enter' && event.ctrlKey) {
+			aiPromptFocused = false;
+			getSoundMix(aiPrompt);
+		}
+	}
+
 	async function getSoundMix(aiPrompt: string) {
+		loading = true;
 		// Request to backend
 		let trackMix: GenerateTrackMixResponse;
 		try {
@@ -51,9 +64,18 @@
 					'content-type': 'application/json'
 				}
 			});
+
+			if (!response.ok) {
+				const responseBody = await response.json();
+				throw new Error(responseBody.message);
+			}
+
 			trackMix = await response.json();
-		} catch {
+		} catch (e: any) {
+			error = e.message;
 			return;
+		} finally {
+			loading = false;
 		}
 
 		selectedTracks = trackMix
@@ -84,8 +106,14 @@
 <Dialog.Root bind:open={aiPromptFocused}>
 	<Dialog.Portal>
 		<Dialog.Overlay />
-		<Dialog.Content>
-			<Textarea bind:value={aiPrompt} />
+		<Dialog.Content class="p-0">
+			<template slot="close"></template>
+			<Textarea bind:value={aiPrompt} on:keypress={handlePromptKeyPress} />
+			<div class="absolute top-full flex flex-row justify-center w-full mt-2">
+				<Button on:click={() => getSoundMix(aiPrompt)}
+					><SendHorizonal class="mr-2" /> Generate</Button
+				>
+			</div>
 		</Dialog.Content>
 	</Dialog.Portal>
 </Dialog.Root>
@@ -96,9 +124,30 @@
 		<span class="text-2xl text-gray-500">GENERATE USING AI</span>
 		<hr class="grow ml-4" />
 	</span>
-	<div class="flex flex-row w-full pt-6 pb-6">
-		<Input type="text" class="grow" bind:value={aiPrompt} on:focus={focusAIPrompt} />
-		<Button on:click={() => getSoundMix(aiPrompt)}><SendHorizonal /></Button>
+	<div class="pt-6 pb-6 w-full">
+		<div class="flex flex-row w-full border border-input rounded-lg">
+			<Input
+				type="text"
+				class="grow border-none"
+				bind:value={aiPrompt}
+				on:focus={focusAIPrompt}
+				disabled={loading}
+			/>
+			<Button on:click={() => getSoundMix(aiPrompt)} disabled={loading}>
+				{#if loading}
+					<LoaderCircle class="animate-spin" />
+				{:else}
+					<SendHorizonal />
+				{/if}
+			</Button>
+		</div>
+		{#if error}
+			<Alert.Root class="mt-2" variant="destructive">
+				<ExclamationTriangle class="h-4 w-4" />
+				<Alert.Title>Error</Alert.Title>
+				<Alert.Description>{error}</Alert.Description>
+			</Alert.Root>
+		{/if}
 	</div>
 	<div class="container w-full font-light">
 		<span class="flex flex-row w-full items-center">
@@ -114,7 +163,7 @@
 				<AudioTrack
 					name={track.name}
 					src={track.src}
-					bind:volume={track.volume}
+					volume={track.volume}
 					random={track.random}
 					periodDurationSeconds={track.periodDurationSeconds}
 					expectedPlaysPerPeriod={track.expectedPlaysPerPeriod}

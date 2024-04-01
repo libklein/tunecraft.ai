@@ -16,7 +16,7 @@
 	$: volume = _volume[0];
 </script>
 
-<Card.Root class="w-full flex flex-col justify-end">
+<Card.Root class="w-full h-full flex flex-col justify-end">
 	<Card.Header>
 		<Card.Title>{name}</Card.Title>
 		<!-- <Card.Description>Card Description</Card.Description> -->

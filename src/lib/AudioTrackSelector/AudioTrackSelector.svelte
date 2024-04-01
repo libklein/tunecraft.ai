@@ -38,15 +38,16 @@
 	$: selectedTrack && createSound(selectedTrack.src);
 	$: selectedTrack || sound?.unload();
 	$: sound && sound.volume(volume);
-	$: !dialogOpen && dialogClosed();
 
 	$: filteredTracks = _.filter(tracks, (track) =>
 		track.name.toLowerCase().includes(search.toLowerCase())
 	);
 
-	function dialogClosed() {
+	function addTrack() {
 		if (selectedTrack) {
+			dialogOpen = false;
 			dispatch('add', selectedTrack);
+			selectedTrack = null;
 		}
 		stopSound();
 	}
@@ -87,13 +88,10 @@
 				<button
 					class={(() => {
 						return selectedTrack !== track
-							? 'p-2 hover:bg-gray-100 flex flex-row items-center rounded w-full'
-							: 'p-2 hover:bg-gray-100 bg-gray-100 flex flex-row items-center rounded w-full';
+							? 'p-2 hover:bg-gray-100 flex flex-row items-center rounded w-full focus-visible:outline-none'
+							: 'p-2 hover:bg-gray-100 bg-gray-100 flex flex-row items-center rounded w-full  focus-visible:outline-none';
 					})()}
-					on:click={() => {
-						selectedTrack = track;
-						dialogOpen = false;
-					}}
+					on:click={addTrack}
 					on:focus={() => {
 						selectedTrack = track;
 					}}

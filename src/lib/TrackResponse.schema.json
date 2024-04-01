@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "volume": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "random": {
+        "type": "boolean"
+      },
+      "random_counter": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "random_unit": {
+        "type": "string",
+        "enum": [
+          "1m",
+          "10m",
+          "1h"
+        ]
+      }
+    },
+    "required": [
+      "name",
+      "volume",
+      "random",
+      "random_counter",
+      "random_unit"
+    ],
+    "additionalProperties": false
+  }
+}
