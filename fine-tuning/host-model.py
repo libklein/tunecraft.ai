@@ -15,7 +15,7 @@ def log_into_huggingface(token: str):
 def evaluate_prompt(model, messages: list[dict]):
     model_response = model.create_chat_completion(messages, max_tokens=2048)
 
-    serialized_response = dumps(model_response["choices"][0]["message"]["content"])
+    serialized_response = model_response["choices"][0]["message"]["content"]
 
     return serialized_response
 
