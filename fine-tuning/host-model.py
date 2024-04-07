@@ -1,12 +1,9 @@
-import torch
-from transformers import AutoTokenizer, pipeline
-from trl import setup_chat_format
-from peft import AutoPeftModelForCausalLM
 from flask import Flask, request
-from transformers import BitsAndBytesConfig
 import os
 from json import dumps, loads
-from unsloth import FastLanguageModel
+from llama_cpp import Llama
+from pathlib import Path
+from typing import Optional
 
 
 def log_into_huggingface(token: str):
@@ -15,43 +12,44 @@ def log_into_huggingface(token: str):
     login(token=token, add_to_git_credential=True)
 
 
-def evaluate_prompt(pipe, prompt: list[dict]):
-    prompt = pipe.tokenizer.apply_chat_template(
-        prompt, tokenize=False, add_generation_prompt=True
-    )
-    outputs = pipe(
-        prompt,
-        max_new_tokens=256,
-        do_sample=True,
-        temperature=0.7,
-        top_k=50,
-        top_p=0.95,
-        eos_token_id=pipe.tokenizer.eos_token_id,
-        pad_token_id=pipe.tokenizer.pad_token_id,
-    )
-    raw_model_response = outputs[0]["generated_text"][len(prompt) :].strip()
-    model_response = loads(raw_model_response)
-    # Add random_unit = 10m to the response
-    for track in model_response:
-        if "random_unit" not in track:
-            track["random_unit"] = "10m"
-    print("Response:", model_response)
+def evaluate_prompt(model, messages: list[dict]):
+    model_response = model.create_chat_completion(messages, max_tokens=2048)
 
-    serialized_response = dumps(model_response)
+    serialized_response = dumps(model_response["choices"][0]["message"]["content"])
 
     return serialized_response
 
 
-def build_pipeline(model_dir_or_id: str, max_seq_length: int = 2048):
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=model_dir_or_id,
-        max_seq_length=max_seq_length,
-        dtype=None,
-        load_in_4bit=True,
-    )
-    FastLanguageModel.for_inference(model)
+def generate_chatml_prompt(
+    prompt: str, system_prompt: Optional[str] = None
+) -> list[dict]:
+    # Add the system prompt to the prompt
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt},
+    ]
 
-    return pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+def load_model(
+    model_dir_or_id: str | Path, use_gpu: bool = False, max_seq_length: int = 2048
+):
+    if Path(model_dir_or_id).exists():
+        return Llama(
+            model_path=str(model_dir_or_id),
+            n_gpu_layers=-1 if use_gpu else 0,
+            n_ctx=max_seq_length,
+            chat_format="chatml",
+            verbose=False,
+        )
+    else:
+        return Llama.from_pretrained(
+            repo_id=str(model_dir_or_id),
+            n_gpu_layers=-1 if use_gpu else 0,
+            n_ctx=max_seq_length,
+            chat_format="chatml",
+            filename="*.gguf",
+            verbose=False,
+        )
 
 
 def create_app(test_config=None):
@@ -79,14 +77,24 @@ def create_app(test_config=None):
             print(f"An error occurred logging into huggingface: {e}")
             return
 
+    system_prompt = app.config.get("SYSTEM_PROMPT")
+    use_gpu = app.config.get("USE_GPU", False)
+    max_seq_length = app.config.get("MAX_SEQ_LENGTH", 2048)
+
     model_dir_or_id = app.config.get("MODEL_DIR_OR_ID")
-    pipe = build_pipeline(model_dir_or_id)
+    model = load_model(model_dir_or_id, use_gpu=use_gpu, max_seq_length=max_seq_length)
 
     @app.route("/evaluate", methods=["POST"])
     def evaluate():
         prompt = request.json.get("prompt")
+
+        if not prompt:
+            return {"error": "Prompt not provided"}, 400
+
+        prompt = generate_chatml_prompt(prompt, system_prompt)
         # Return the response
-        model_response = evaluate_prompt(pipe, prompt)
+        model_response = evaluate_prompt(model, prompt)
+
         # Model returns a json formatted string. Indicate that it's in fact json
         response = app.response_class(
             response=model_response, status=200, mimetype="application/json"
