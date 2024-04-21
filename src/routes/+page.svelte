@@ -71,6 +71,7 @@
 			}
 
 			trackMix = await response.json();
+			error = '';
 		} catch (e: any) {
 			error = e.message;
 			return;
