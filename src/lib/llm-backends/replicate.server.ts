@@ -1,4 +1,10 @@
 import type { TrackResponseItem } from '../models';
+import replicate from 'replicate'
+import { REPLICATE_API_TOKEN, REPLICATE_MODEL_ID } from '$env/static/private';
+
+const replicateClient = new replicate({
+  auth: REPLICATE_API_TOKEN,
+})
 
 export async function generateAmbientMix(tracks: string[], query: string): Promise<TrackResponseItem[]> {
   const initialPrompt = `
@@ -33,15 +39,15 @@ I will provide descriptions of the enviroments and moods I'd like to create an a
   ]
 
   try {
-    const response = await fetch('http://127.0.0.1:8080/evaluate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt: messages }),
+    const response = await replicateClient.run(REPLICATE_MODEL_ID, {
+      input: { prompt: query }
     })
-
-    const completion = await response.json()
+    let completion = ""
+    try {
+      completion = JSON.parse(response)
+    } catch (e) {
+      throw "AI did not return a valid response"
+    }
 
     if (completion.length == 0) {
       throw "AI did not return a valid response"
