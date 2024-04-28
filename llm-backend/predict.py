@@ -20,6 +20,11 @@ def generate_chatml_prompt(
     ]
 
 
+def read_api_key():
+    with open(".api_key", "r") as f:
+        return f.read().strip()
+
+
 class Predictor(BasePredictor):
     system_prompt = None
     use_gpu = False
@@ -34,6 +39,7 @@ class Predictor(BasePredictor):
         return serialized_response
 
     def setup(self):
+        self.api_key = read_api_key()
         self.model = Llama(
             model_path=str(self.model_path),
             n_gpu_layers=-1 if self.use_gpu else 0,
@@ -42,7 +48,14 @@ class Predictor(BasePredictor):
             verbose=False,
         )
 
-    def predict(self, prompt: str = Input(description="The prompt.")) -> str:
+    def predict(
+        self,
+        prompt: str = Input(description="The prompt."),
+        key: str = Input(description="API Key", default=""),
+    ) -> str:
+        if key != self.api_key:
+            logger.error("Unauthorized request.")
+            return None
         logger.info("Received request.", extra={"prompt": prompt})
         parsed_prompt = generate_chatml_prompt(prompt, self.system_prompt)
         logger.info(

@@ -2,3 +2,4 @@ __pycache__
 llm.gguf
 .cog
 .hugging-face-token
+.api_key
