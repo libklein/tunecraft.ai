@@ -9,7 +9,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { SendHorizonal, LoaderCircle } from 'lucide-svelte';
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { onMount } from 'svelte';
 	import AudioTrackSelector from '$lib/AudioTrackSelector';
 	import VolumeControl from '@/VolumeControl.svelte';
 	import * as Alert from '$lib/components/ui/alert';
@@ -97,10 +96,6 @@
 			})
 			.filter(Boolean) as Track[];
 	}
-
-	onMount(() => {
-		getSoundMix(aiPrompt);
-	});
 </script>
 
 <!-- The prompt dialog -->

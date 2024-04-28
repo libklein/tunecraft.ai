@@ -1,4 +1,6 @@
 import type { TrackResponseItem } from '../models';
+import replicate from 'replicate'
+import { COG_API_KEY, COG_ENDPOINT_URL } from '$env/static/private';
 
 export async function generateAmbientMix(tracks: string[], query: string): Promise<TrackResponseItem[]> {
   const initialPrompt = `
@@ -33,15 +35,27 @@ I will provide descriptions of the enviroments and moods I'd like to create an a
   ]
 
   try {
-    const response = await fetch('http://127.0.0.1:8080/evaluate', {
+    const response = await fetch(COG_ENDPOINT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prompt: messages }),
+      body: JSON.stringify({
+        input: {
+          prompt: query,
+          key: COG_API_KEY
+        }
+      }),
     })
 
-    const completion = await response.json()
+    console.log(response)
+
+    let completion = ""
+    try {
+      completion = JSON.parse(response)
+    } catch (e) {
+      throw "AI did not return a valid response"
+    }
 
     if (completion.length == 0) {
       throw "AI did not return a valid response"
