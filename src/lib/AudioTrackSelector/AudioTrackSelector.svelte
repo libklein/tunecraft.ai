@@ -38,6 +38,7 @@
 	$: selectedTrack && createSound(selectedTrack.src);
 	$: selectedTrack || sound?.unload();
 	$: sound && sound.volume(volume);
+	$: !dialogOpen && stopSound();
 
 	$: filteredTracks = _.filter(tracks, (track) =>
 		track.name.toLowerCase().includes(search.toLowerCase())

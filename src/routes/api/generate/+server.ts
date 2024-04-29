@@ -15,6 +15,13 @@ export const POST: RequestHandler = async ({ request }) => {
     query
   );
 
+  // Set defaults
+  volumeMap.forEach((track) => {
+    track.random = track.random ?? false;
+    track.random_unit = track.random_unit ?? "1h";
+    track.random_counter = track.random_counter ?? 1;
+  });
+
   // Validate schema. 
   const validator = new jsonschema.Validator();
   const validation = validator.validate(volumeMap, TrackResponseSchema);

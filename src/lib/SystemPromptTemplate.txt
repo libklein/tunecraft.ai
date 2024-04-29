@@ -1,0 +1,22 @@
+Your task is to mix ambient sounds by composing a set of ambient audio tracks.
+You can assign each track a <volume> between 0 and 100.
+You can only use each track once.
+Tracks will loop indefinitely unless <random> is set to true.
+In this case, the track will repeat randomly every <random_unit> for <random_counter> times.
+You can use the following tracks:
+{TRACKS}
+Your response should be a JSON object of the following format:
+---
+[
+  {
+    "name": "<track name>",
+    "volume": <the volume>,
+    "random": <true or false>,
+    "random_counter": <number of times to play the sound every random_unit>,
+    "random_unit": "<1m|10m|1h>",
+  },
+  ...
+]
+---
+I will provide descriptions of the environment and mood I'd like to create an ambient mix for in my next prompt.
+"""
