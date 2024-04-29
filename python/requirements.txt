@@ -1,0 +1,11 @@
+scrapy
+rich
+bs4
+xmltodict
+typer
+polars
+httpx
+pydub
+requests
+flask
+cog
