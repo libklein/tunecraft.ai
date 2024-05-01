@@ -42,6 +42,7 @@ export async function generateAmbientMix(tracks: string[], query: string): Promi
 
   const completion = await client.chat.completions.create({
     model: 'gpt-3.5-turbo',
+    response_format: { type: 'json_object' },
     messages: [{
       role: 'system',
       content: initialPrompt
