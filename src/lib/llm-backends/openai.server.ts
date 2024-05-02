@@ -1,7 +1,7 @@
 
 import OpenAI from 'openai'
-import type { TrackResponseItem } from '../models'
-import { OPENAI_API_KEY } from '$env/static/private'
+import type { TrackMixAiResponse, TrackResponseItem } from '../models'
+import { OPENAI_API_KEY, OPENAI_MODEL } from '$env/static/private'
 const SystemPromptTemplate = (await import('$lib/SystemPromptTemplate.txt?raw')).default
 
 const TRACK_MIX_RESPONSE_RE = /[^]*(?<trackMix>\[[^]*\])[^]*/m
@@ -24,35 +24,31 @@ function createQueryPrompt(query: string): string {
   return "[noprose]\n[onlyjson]\n" + query
 }
 
-export async function generateAmbientMix(tracks: string[], query: string): Promise<TrackResponseItem[]> {
+export async function generateAmbientMix(tracks: string[], query: string): Promise<TrackMixAiResponse> {
   const client = new OpenAI({
     apiKey: OPENAI_API_KEY
   })
 
-  const initialPrompt = createSystemPrompt(tracks);
+  const systemPrompt = createSystemPrompt(tracks);
+  const userPrompt = createQueryPrompt(query);
 
-  const messages = [{
-    role: 'system',
-    content: initialPrompt
-  },
-  {
-    role: 'user',
-    content: createQueryPrompt(query)
-  }]
+  const requestTimestamp = new Date()
 
   const completion = await client.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    response_format: { type: 'json_object' },
+    model: OPENAI_MODEL,
+    seed: 0,
     messages: [{
       role: 'system',
-      content: initialPrompt
+      content: systemPrompt
     },
     {
       role: 'user',
-      content: createQueryPrompt(query)
+      content: userPrompt
     }],
     stream: false,
   })
+
+  const responseTimestamp = new Date()
 
   if (completion.choices.length == 0 || !completion.choices[0].message.content) {
     throw "AI did not return a response"
@@ -60,7 +56,21 @@ export async function generateAmbientMix(tracks: string[], query: string): Promi
 
   try {
     // Parse response
-    return extractTrackMix(completion.choices[0].message.content);
+    return {
+      requestTimestamp: new Date(requestTimestamp.toISOString()),
+      responseTimestamp: new Date(responseTimestamp.toISOString()),
+      provider: "openai",
+      model: OPENAI_MODEL,
+      seed: 0,
+      systemPrompt: systemPrompt,
+      userPrompt: userPrompt,
+      modelResponse: completion.choices[0].message.content,
+
+      promptTokens: completion.usage?.prompt_tokens ?? 0,
+      responseTokens: completion.usage?.completion_tokens ?? 0,
+
+      trackMix: extractTrackMix(completion.choices[0].message.content)
+    }
   } catch {
     throw "Faild to parse AI response"
   }

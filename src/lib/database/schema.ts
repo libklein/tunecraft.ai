@@ -16,10 +16,11 @@ import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 export const PredictionTable = table('predictions', {
   id: uuid('id').defaultRandom().primaryKey(),
   // Metadata
-  timestamp: timestamp('timestamp').defaultNow(),
   provider: text('provider').notNull(),
   model: text('model').notNull(),
-  duration: interval('duration').notNull(),
+
+  requestTimestamp: timestamp('requestTimestamp').notNull(),
+  responseTimestamp: timestamp('responseTimestamp').notNull(),
   seed: integer('seed'),
 
   // Model input
@@ -38,7 +39,6 @@ export const MixesTable = table('mixes', {
   id: uuid('id').defaultRandom().primaryKey(),
   query: text('query').notNull(),
   // Metadata
-  timestamp: timestamp('timestamp').defaultNow(),
   predictionId: uuid('predictionId').references(() => PredictionTable.id),
 });
 

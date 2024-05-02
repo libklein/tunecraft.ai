@@ -27,3 +27,24 @@ interface TrackResponseItem {
 }
 
 export type GenerateTrackMixResponse = TrackResponseItem[]
+
+interface TrackMixAiResponse {
+  requestTimestamp: Date
+  responseTimestamp: Date
+  provider: string
+  model: string
+  seed: number
+
+  // Model input
+  systemPrompt: string
+  userPrompt: string
+  // Model output
+  modelResponse: string
+
+  // Usage
+  promptTokens: number
+  responseTokens: number
+
+  trackMix: TrackResponseItem[]
+}
+
