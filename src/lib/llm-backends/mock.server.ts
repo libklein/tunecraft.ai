@@ -1,50 +1,37 @@
-import type { TrackResponseItem } from '../models';
+import type { TrackMixAiResponse, TrackResponseItem } from '../models';
 
-export async function generateAmbientMix(tracks: string[], query: string): Promise<TrackResponseItem[]> {
+export async function generateAmbientMix(tracks: string[], query: string): Promise<TrackMixAiResponse> {
   // Wait 5 seconds
   await new Promise(resolve => setTimeout(resolve, 5000));
-  return [
+  const trackMix: TrackResponseItem[] = [
     {
-      "name": "Breakwater",
-      "volume": 100,
-      "random": false,
-      "random_counter": 1,
-      "random_unit": "1h"
-    },
-    {
-      "name": "Wooden Ship",
-      "volume": 90,
-      "random": false,
-      "random_counter": 5,
-      "random_unit": "1h"
-    },
-    {
-      "name": "Ropes",
-      "volume": 80,
-      "random": true,
-      "random_counter": 5,
-      "random_unit": "10m"
-    },
-    {
-      "name": "seagull on beach",
-      "volume": 63,
-      "random": true,
-      "random_counter": 3,
-      "random_unit": "10m"
-    },
-    {
-      "name": "Flapping Cotton",
-      "volume": 63,
-      "random": true,
-      "random_counter": 5,
-      "random_unit": "10m"
-    },
-    {
-      "name": "All I Ask of You Humming",
+      "name": "Birdsong",
       "volume": 0,
       "random": false,
       "random_counter": 3,
       "random_unit": "10m"
     },
+    {
+      "name": "Burning campfire",
+      "volume": 0,
+      "random": false,
+      "random_counter": 3,
+      "random_unit": "10m"
+    }
   ];
+
+  return {
+    requestTimestamp: new Date(),
+    responseTimestamp: new Date(),
+    provider: "mock",
+    model: "mock",
+    seed: 0,
+    systemPrompt: "",
+    userPrompt: "",
+    modelResponse: "",
+    promptTokens: 0,
+    responseTokens: 0,
+    trackMix
+
+  }
 }

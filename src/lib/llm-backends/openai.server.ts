@@ -4,16 +4,8 @@ import type { TrackMixAiResponse, TrackResponseItem } from '../models'
 import { OPENAI_API_KEY, OPENAI_MODEL } from '$env/static/private'
 const SystemPromptTemplate = (await import('$lib/SystemPromptTemplate.txt?raw')).default
 
-const TRACK_MIX_RESPONSE_RE = /[^]*(?<trackMix>\[[^]*\])[^]*/m
-
 function extractTrackMix(aiResponse: string): TrackResponseItem[] {
   return JSON.parse(aiResponse)
-  const match = aiResponse.match(TRACK_MIX_RESPONSE_RE)
-  if (match && Object.hasOwn(match?.groups ?? {}, 'trackMix')) {
-    return JSON.parse(match?.groups['trackMix'] as string)
-  } else {
-    throw "Failed to extract track mix from response"
-  }
 }
 
 function createSystemPrompt(tracks: string[]): string {

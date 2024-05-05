@@ -13,16 +13,22 @@
 	import VolumeControl from '@/VolumeControl.svelte';
 	import * as Alert from '$lib/components/ui/alert';
 	import { ExclamationTriangle } from 'svelte-radix';
+	import { Toaster } from '$lib/components/ui/sonner';
+	import { toast } from 'svelte-sonner';
+	import RatingPrompt from '@/RatingPrompt/RatingPrompt.svelte';
 
 	let masterVolume: number = 1;
 
 	let selectedTracks: Track[] = [];
+	let lastMixId: string | null = null;
 	const trackMap = _.cloneDeep(DEFAULT_TRACK_MAP);
 	let aiPrompt: string =
 		'Relaxing music for studying with a fireplace in the background and some train noises.';
 	let aiPromptFocused = false;
 	let loading = false;
 	let error = '';
+	let ratingPromptId: ReturnType<typeof toast.custom> | null = null;
+	let ratingPromptTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	function focusAIPrompt() {
 		aiPromptFocused = true;
@@ -33,9 +39,10 @@
 			...selectedTracks,
 			{
 				...track,
-				volume: 1
+				id: Math.random().toString(36).substring(2)
 			}
 		];
+		console.log(selectedTracks);
 	}
 
 	function removeTrack(track: Track) {
@@ -53,6 +60,10 @@
 
 	async function getSoundMix(aiPrompt: string) {
 		loading = true;
+		hideRatingPrompt();
+		if (ratingPromptTimeout != null) {
+			clearTimeout(ratingPromptTimeout);
+		}
 		// Request to backend
 		let trackMix: GenerateTrackMixResponse;
 		try {
@@ -71,6 +82,10 @@
 
 			trackMix = await response.json();
 			error = '';
+			// Show rating prompt after 5 seconds
+			ratingPromptTimeout = setTimeout(() => {
+				showRatingPrompt();
+			}, 5000);
 		} catch (e: any) {
 			error = e.message;
 			return;
@@ -78,7 +93,9 @@
 			loading = false;
 		}
 
-		selectedTracks = trackMix
+		lastMixId = trackMix.mixId;
+
+		selectedTracks = trackMix.mix
 			.map((track) => {
 				const trackDefinition = trackMap.get(track.name);
 				if (!trackDefinition) {
@@ -86,15 +103,53 @@
 					return;
 				}
 				return {
-					...trackDefinition,
-					...track,
-					volume: track.volume / 100,
+					name: track.name,
+					src: trackDefinition.src,
+					volume: track.volume,
 					random: track.random,
 					periodDurationSeconds: TRACK_PERIOD_DURATION_TO_SECONDS[track.random_unit],
 					expectedPlaysPerPeriod: track.random_counter
 				};
 			})
 			.filter(Boolean) as Track[];
+	}
+
+	async function submitRating(rating: number) {
+		if (lastMixId !== null) {
+			const response = await fetch('/api/rate', {
+				method: 'POST',
+				body: JSON.stringify({ rating, mixId: lastMixId }),
+				headers: {
+					'content-type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				const responseBody = await response.json();
+				throw new Error(responseBody.message);
+			}
+		}
+	}
+
+	function hideRatingPrompt() {
+		if (ratingPromptId !== null) {
+			toast.dismiss(ratingPromptId);
+		}
+		ratingPromptId = null;
+	}
+
+	function showRatingPrompt() {
+		ratingPromptId = toast.custom(RatingPrompt, {
+			duration: Number.POSITIVE_INFINITY,
+			onDismiss: hideRatingPrompt,
+			onAutoClose: hideRatingPrompt,
+			componentProps: {
+				ratingCb: (value) => {
+					submitRating(value);
+					hideRatingPrompt();
+				}
+			}
+		});
 	}
 </script>
 
@@ -113,6 +168,7 @@
 		</Dialog.Content>
 	</Dialog.Portal>
 </Dialog.Root>
+<Toaster position="bottom-center" expand class="shadow-none" />
 
 <div class="container flex flex-col mx-auto max-w-3xl items-center justify-center h-full">
 	<span class="flex flex-row w-full items-center font-light">
@@ -148,18 +204,20 @@
 	<div class="container w-full font-light">
 		<span class="flex flex-row w-full items-center">
 			<hr class="grow mr-4" />
-			<span class="text-2xl text-gray-500">OR MIX YOURSELF</span>
+			<span class="text-2xl text-gray-500">MIX YOURSELF</span>
 			<hr class="grow ml-4" />
 		</span>
-		<VolumeControl bind:volume={masterVolume}></VolumeControl>
+		<div class="pb-2">
+			<VolumeControl bind:volume={masterVolume}></VolumeControl>
+		</div>
 	</div>
 	<ul class="container max-w-3xl mx-auto flex flex-row flex-wrap justify-center gap-4">
-		{#each selectedTracks as track (track.name)}
+		{#each selectedTracks as track (track.id)}
 			<li class="w-48 h-48 flex">
 				<AudioTrack
 					name={track.name}
 					src={track.src}
-					volume={track.volume}
+					bind:volume={track.volume}
 					random={track.random}
 					periodDurationSeconds={track.periodDurationSeconds}
 					expectedPlaysPerPeriod={track.expectedPlaysPerPeriod}

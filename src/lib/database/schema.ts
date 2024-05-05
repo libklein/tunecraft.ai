@@ -5,10 +5,10 @@ import {
   varchar,
   text,
   timestamp,
-  interval,
   boolean,
   real,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm/sql'
 
 import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 

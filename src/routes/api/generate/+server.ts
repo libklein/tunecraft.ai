@@ -9,7 +9,7 @@ import type { TrackMixAiResponse } from '$lib/models';
 import { db } from '$lib/database';
 import { PredictionTable, MixesTable, TrackMixTable } from '@/database/schema';
 
-async function insertIntoDatabase(query: string, response: TrackMixAiResponse, tracks: TrackResponseItem[]) {
+async function insertIntoDatabase(query: string, response: TrackMixAiResponse, tracks: TrackResponseItem[]): Promise<string> {
   // Insert Prediction
   const prediction = (await db.insert(PredictionTable).values({
     provider: response.provider,
@@ -45,6 +45,8 @@ async function insertIntoDatabase(query: string, response: TrackMixAiResponse, t
       frequency: track.random_counter
     });
   }));
+
+  return mix.id;
 }
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -52,24 +54,24 @@ export const POST: RequestHandler = async ({ request }) => {
   const query = postData.query;
   // Query AI
   const response = await generateAmbientMix(audioResources.map(elem => elem.name), query);
-  const volumeMap: TrackResponseItem[] = response.trackMix;
+  const mix: TrackResponseItem[] = response.trackMix;
   // Set defaults
-  volumeMap.forEach((track) => {
+  mix.forEach((track) => {
     track.random = track.random ?? false;
     track.random_unit = track.random_unit ?? "1h";
     track.random_counter = track.random_counter ?? 1;
   });
 
   // Save to database
-  await insertIntoDatabase(query, response, volumeMap);
+  const mixId = await insertIntoDatabase(query, response, mix);
 
   // Validate schema. 
   const validator = new jsonschema.Validator();
-  const validation = validator.validate(volumeMap, TrackResponseSchema);
+  const validation = validator.validate(mix, TrackResponseSchema);
   if (validation.errors.length > 0) {
     return error(500, 'Invalid response from AI. Please adjust your prompt or try again later.')
   }
 
-  return json(volumeMap);
+  return json({ mixId, mix });
 }
 

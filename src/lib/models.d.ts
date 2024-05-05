@@ -26,7 +26,10 @@ interface TrackResponseItem {
   random_counter: number
 }
 
-export type GenerateTrackMixResponse = TrackResponseItem[]
+export interface GenerateTrackMixResponse {
+  mixId: string,
+  mix: TrackResponseItem[]
+}
 
 interface TrackMixAiResponse {
   requestTimestamp: Date

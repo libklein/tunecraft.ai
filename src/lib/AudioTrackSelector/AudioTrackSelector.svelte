@@ -47,7 +47,7 @@
 	function addTrack() {
 		if (selectedTrack) {
 			dialogOpen = false;
-			dispatch('add', selectedTrack);
+			dispatch('add', { ...selectedTrack, volume });
 			selectedTrack = null;
 		}
 		stopSound();
@@ -66,7 +66,7 @@
 
 <!-- The add track dialog -->
 <Dialog.Root bind:open={dialogOpen}>
-	<Dialog.Content class="h-64 p-0 pt-4 flex flex-col">
+	<Dialog.Content class="h-dvh min-h-64 max-h-96 p-0 pt-4 flex flex-col">
 		<Dialog.Header class="pl-4 pr-4 grow-0"><Dialog.Title>Add track</Dialog.Title></Dialog.Header>
 		<div
 			class="flex flex-row items-center justify-start border-gray-150 border-t border-b px-3 grow-0"
