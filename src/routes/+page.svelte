@@ -165,8 +165,11 @@
 			<template slot="close"></template>
 			<Textarea bind:value={aiPrompt} on:keypress={handlePromptKeyPress} />
 			<div class="absolute top-full flex flex-row justify-center w-full mt-2">
-				<Button on:click={() => getSoundMix(aiPrompt)}
-					><SendHorizonal class="mr-2" /> Generate</Button
+				<Button
+					on:click={() => {
+						aiPromptFocused = false;
+						getSoundMix(aiPrompt);
+					}}><SendHorizonal class="mr-2" /> Generate</Button
 				>
 			</div>
 		</Dialog.Content>
