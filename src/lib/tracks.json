@@ -5,7 +5,7 @@
     "volume": 0
   },
   {
-    "name": "BurningCampfire",
+    "name": "Burning campfire",
     "src": "/BurningCampfire.mp3",
     "volume": 0
   },
@@ -20,17 +20,17 @@
     "volume": 0
   },
   {
-    "name": "OceanWaves",
+    "name": "Ocean waves",
     "src": "/OceanWaves.mp3",
     "volume": 0
   },
   {
-    "name": "PendulumClock",
+    "name": "Pendulum clock",
     "src": "/PendulumClock.mp3",
     "volume": 0
   },
   {
-    "name": "PersonEatingAnApple",
+    "name": "Person eating an apple",
     "src": "/PersonEatingAnApple.mp3",
     "volume": 0
   },
@@ -45,7 +45,7 @@
     "volume": 0
   },
   {
-    "name": "RainonLeaves",
+    "name": "Rain on leaves",
     "src": "/RainonLeaves.mp3",
     "volume": 0
   },
@@ -55,7 +55,7 @@
     "volume": 0
   },
   {
-    "name": "SpinningFan",
+    "name": "Spinning fan",
     "src": "/SpinningFan.mp3",
     "volume": 0
   },
@@ -70,12 +70,12 @@
     "volume": 0
   },
   {
-    "name": "TypingOnKeyboard",
+    "name": "Typing on keyboard",
     "src": "/TypingOnKeyboard.mp3",
     "volume": 0
   },
   {
-    "name": "WhiteNoise",
+    "name": "White noise",
     "src": "/WhiteNoise.mp3",
     "volume": 0
   },

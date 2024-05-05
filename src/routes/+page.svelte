@@ -17,7 +17,7 @@
 	let masterVolume: number = 1;
 
 	let selectedTracks: Track[] = [];
-	let trackMap = _.cloneDeep(DEFAULT_TRACK_MAP);
+	const trackMap = _.cloneDeep(DEFAULT_TRACK_MAP);
 	let aiPrompt: string =
 		'Relaxing music for studying with a fireplace in the background and some train noises.';
 	let aiPromptFocused = false;
