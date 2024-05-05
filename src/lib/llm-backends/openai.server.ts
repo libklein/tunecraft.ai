@@ -26,9 +26,11 @@ export async function generateAmbientMix(tracks: string[], query: string): Promi
 
   const requestTimestamp = new Date()
 
+  const seed = Math.floor(Math.random() * 10000)
+
   const completion = await client.chat.completions.create({
     model: OPENAI_MODEL,
-    seed: 0,
+    seed: seed,
     messages: [{
       role: 'system',
       content: systemPrompt
@@ -53,7 +55,7 @@ export async function generateAmbientMix(tracks: string[], query: string): Promi
       responseTimestamp: new Date(responseTimestamp.toISOString()),
       provider: "openai",
       model: OPENAI_MODEL,
-      seed: 0,
+      seed: seed,
       systemPrompt: systemPrompt,
       userPrompt: userPrompt,
       modelResponse: completion.choices[0].message.content,
