@@ -42,7 +42,6 @@
 				id: Math.random().toString(36).substring(2)
 			}
 		];
-		console.log(selectedTracks);
 	}
 
 	function removeTrack(track: Track) {
@@ -85,7 +84,7 @@
 			// Show rating prompt after 5 seconds
 			ratingPromptTimeout = setTimeout(() => {
 				showRatingPrompt();
-			}, 5000);
+			}, 10000);
 		} catch (e: any) {
 			error = e.message;
 			return;
@@ -95,7 +94,7 @@
 
 		lastMixId = trackMix.mixId;
 
-		selectedTracks = trackMix.mix
+		trackMix.mix
 			.map((track) => {
 				const trackDefinition = trackMap.get(track.name);
 				if (!trackDefinition) {
@@ -104,6 +103,7 @@
 				}
 				return {
 					name: track.name,
+					description: trackDefinition.description,
 					src: trackDefinition.src,
 					volume: track.volume,
 					random: track.random,
@@ -111,7 +111,8 @@
 					expectedPlaysPerPeriod: track.random_counter
 				};
 			})
-			.filter(Boolean) as Track[];
+			.filter(Boolean)
+			.forEach(addTrack);
 	}
 
 	async function submitRating(rating: number) {

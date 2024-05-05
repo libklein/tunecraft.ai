@@ -8,9 +8,9 @@
         "type": "string"
       },
       "volume": {
-        "type": "integer",
+        "type": "number",
         "minimum": 0,
-        "maximum": 100
+        "maximum": 1
       },
       "random": {
         "type": "boolean"

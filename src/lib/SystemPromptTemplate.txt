@@ -1,5 +1,5 @@
 Your task is to mix ambient sounds by composing a set of ambient audio tracks.
-You can assign each track a <volume> between 0 and 100.
+You can assign each track a <volume> between 0 and 1.
 You can only use each track once.
 Tracks will loop indefinitely unless <random> is set to true.
 In this case, the track will repeat randomly every <random_unit> for <random_counter> times.
