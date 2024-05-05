@@ -219,9 +219,9 @@
 					name={track.name}
 					src={track.src}
 					bind:volume={track.volume}
-					random={track.random}
-					periodDurationSeconds={track.periodDurationSeconds}
-					expectedPlaysPerPeriod={track.expectedPlaysPerPeriod}
+					bind:random={track.random}
+					bind:periodDurationSeconds={track.periodDurationSeconds}
+					bind:expectedPlaysPerPeriod={track.expectedPlaysPerPeriod}
 					maxVolume={masterVolume}
 					on:remove={() => removeTrack(track)}
 				></AudioTrack>
