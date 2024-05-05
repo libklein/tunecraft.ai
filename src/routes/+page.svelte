@@ -94,6 +94,9 @@
 
 		lastMixId = trackMix.mixId;
 
+		// Clear the current selection
+		selectedTracks = [];
+
 		trackMix.mix
 			.map((track) => {
 				const trackDefinition = trackMap.get(track.name);
